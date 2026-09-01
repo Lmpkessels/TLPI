@@ -14,7 +14,6 @@ int main(void)
     //tee(3, argc);
 
     char *argc2[3] = {"tee", "-a", "file2.txt"};
-    // FIX: -a no such file or directory at: input_fd
     tee(3, argc2);
 }
 
@@ -35,12 +34,14 @@ int tee(int argv, char *argc[])
 {
     int input_fd, output_fd;
     int num_read;
-    int *buffer[BUF_SIZE];
+    int buffer[BUF_SIZE];
     
-    // Open input file to read from
-    input_fd = open(argc[1], O_RDONLY);
-    if (input_fd == -1) {
-        error_exit(("opening file %s", argc[1]));
+    // Open input file for the output file when the append (-a) flag is not used
+    if (argc[1] != "-a") {
+        input_fd = open(argc[1], O_RDONLY);
+        if (input_fd == -1) {
+            error_exit(("opening file %s", argc[1]));
+        }
     }
 
     // Open output file to write to
@@ -49,28 +50,20 @@ int tee(int argv, char *argc[])
         error_exit(("opening file: %s", argc[2]));
     }
 
-    // In case flag -a is used append text to the already existing given file
-    switch (argc[1][0]) {
-        case '-':
-            if (argc[1][1] == 'a') {
-                char *text = "Hello new world!";
+    // Decide to use the flag or copy the file (argc[1]) to the file (argc[2])
+    if (argc[1] == "-a") {
+        char *text = " Hello new world!";
 
-                if (write(output_fd, text, strlen(text)) == -1) {
-                    error_exit("write() returned error or partial append occured");
-                }
-            };
-            break;
-        default:
-            // Write a copy of the file and save it in the given file
-            while ((num_read = read(input_fd, buffer, BUF_SIZE)) > 0) {
-                if (write(output_fd, buffer, num_read) != num_read) {
-                    error_exit("write() returned error or partial write occured");
-                }
+        if (write(output_fd, text, strlen(text)) == -1) {
+            error_exit("write() returned error or partial append occured");
+        }
+    } else {
+        while ((num_read = read(input_fd, buffer, BUF_SIZE)) > 0) {
+            if (write(output_fd, buffer, num_read) != num_read) {
+                error_exit("write() returned error or partial write occured");
             }
-            break;
-    } 
-
-    close(input_fd);
+        }
+    }
 
     if (close(input_fd) == -1) {
         error_exit(("closing file: %d", argc[1]));
