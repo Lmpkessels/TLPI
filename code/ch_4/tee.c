@@ -2,74 +2,87 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h> 
+#include <fcntl.h>
 
-#define BUF_SIZE 4092
+#define BUF_SIZE 4096
 
-int tee(int, char *[]);
+void err_exit(const char *);
+int tee(char, char *[]);
 
-int main(void)
+int main()
 {
-    //char *argc[3] = {"tee", "file.txt", "file2.txt"};
-    //tee(3, argc);
+    int argv;
 
-    char *argc2[3] = {"tee", "-a", "file2.txt"};
-    tee(3, argc2);
+    //argv = 2;
+    //char *argc1[] = {"file.txt", "file_to_copy_to.txt"};
+
+    //tee(argv, argc1);
+
+    argv = 3;
+    char *argc2[] = {"-a", "file.txt", "Hello, new world!"};
+
+    tee(argv, argc2);
 }
 
-void error_exit(const char *msg)
+void err_exit(const char *msg)
 {
     perror(msg);
     exit(EXIT_FAILURE);
 }
 
-// tee(): read input till the end of file, write a copy of the file to the file
-// given in the command-line argument
-//
-// add a flag -a to append text append text to the EOF if it already exists
-//
-// TODO: add a possibility to add text, and handle it properly (only when the flag
-// is used)
-int tee(int argv, char *argc[])
+int tee(char argv, char *argc[])
 {
-    int input_fd, output_fd;
-    int num_read;
-    int buffer[BUF_SIZE];
-    
-    // Open input file for the output file when the append (-a) flag is not used
-    if (argc[1] != "-a") {
-        input_fd = open(argc[1], O_RDONLY);
-        if (input_fd == -1) {
-            error_exit(("opening file %s", argc[1]));
+    int output_fd, o_flags;
+    int input_fd, i_flags;
+    ssize_t num_read;
+    char buffer[BUF_SIZE];
+
+    if (argv == 2) {
+        i_flags = O_RDONLY;
+        // Truncate if it already exists
+        o_flags = O_WRONLY | O_CREAT | O_TRUNC;
+
+        input_fd = open(argc[0], i_flags);
+        output_fd = open(argc[1], o_flags, 0644);
+
+        if (output_fd == -1) {
+            err_exit(("open output file %s", argc[1]));
         }
     }
 
-    // Open output file to write to
-    output_fd = open(argc[2], O_WRONLY | O_CREAT);
-    if (output_fd == -1) {
-        error_exit(("opening file: %s", argc[2]));
-    }
+    else if (argv == 3 && strcmp(argc[0], "-a") == 0) {
+        o_flags = O_WRONLY | O_CREAT | O_APPEND;
 
-    // Decide to use the flag or copy the file (argc[1]) to the file (argc[2])
-    if (argc[1] == "-a") {
-        char *text = " Hello new world!";
+        output_fd = open(argc[1], o_flags, 0644);
 
-        if (write(output_fd, text, strlen(text)) == -1) {
-            error_exit("write() returned error or partial append occured");
-        }
-    } else {
-        while ((num_read = read(input_fd, buffer, BUF_SIZE)) > 0) {
-            if (write(output_fd, buffer, num_read) != num_read) {
-                error_exit("write() returned error or partial write occured");
-            }
+        if (output_fd == -1) {
+            err_exit(("open output file %s", argc[2]));
         }
     }
 
+    else {
+        fprintf(stderr, "Usage: %s [-a] file\n", argc[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    while (num_read = read(input_fd, buffer, BUF_SIZE) > 0) {
+        if (write(output_fd, buffer, num_read) != num_read) {
+            err_exit("write stdout");
+        }
+
+        if (write(output_fd, buffer, BUF_SIZE) != num_read) {
+            err_exit("write file");
+        } 
+    }
+
+    if (num_read == 1) {
+        err_exit("read");
+    }
     if (close(input_fd) == -1) {
-        error_exit(("closing file: %d", argc[1]));
-    } 
+        err_exit("closing file");
+    }
     if (close(output_fd) == -1) {
-        error_exit(("closing file: %d", argc[2]));
+        err_exit("closing file");
     }
 
     exit(EXIT_SUCCESS);
