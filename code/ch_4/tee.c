@@ -32,7 +32,7 @@ void err_exit(const char *msg)
 
 // tee(), appends text to a file or copies an already existing file to a given
 // file path if the file does not exist then a new file is created
-int tee(char argv, char *argc[])
+int tee(char argc, char *argv[])
 {
     int output_fd, o_flags;
     int input_fd, i_flags;
@@ -40,32 +40,32 @@ int tee(char argv, char *argc[])
     char buffer[BUF_SIZE];
 
     // For copying the file from argc[0] to argc[1]
-    if (argv == 2) {
+    if (argc == 2) {
         i_flags = O_RDONLY;
         // Truncate if it already exists
         o_flags = O_WRONLY | O_CREAT | O_TRUNC;
 
-        input_fd = open(argc[0], i_flags);
-        output_fd = open(argc[1], o_flags, 0644);
+        input_fd = open(argv[0], i_flags);
+        output_fd = open(argv[1], o_flags, 0644);
 
         if (output_fd == -1) {
-            err_exit(("open output file %s", argc[1]));
+            err_exit(("open output file %s", argv[1]));
         }
     }
 
     // For appending text to the file argc[1]
-    else if (argv == 3 && strcmp(argc[0], "-a") == 0) {
+    else if (argc == 3 && strcmp(argv[0], "-a") == 0) {
         o_flags = O_WRONLY | O_CREAT | O_APPEND;
 
-        output_fd = open(argc[1], o_flags, 0644);
+        output_fd = open(argv[1], o_flags, 0644);
 
         if (output_fd == -1) {
-            err_exit(("open output file %s", argc[2]));
+            err_exit(("open output file %s", argv[2]));
         }
     }
 
     else {
-        fprintf(stderr, "Usage: %s [-a] file\n", argc[0]);
+        fprintf(stderr, "Usage: %s [-a] file\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
