@@ -30,6 +30,8 @@ void err_exit(const char *msg)
     exit(EXIT_FAILURE);
 }
 
+// tee(), appends text to a file or copies an already existing file to a given
+// file path if the file does not exist then a new file is created
 int tee(char argv, char *argc[])
 {
     int output_fd, o_flags;
@@ -37,6 +39,7 @@ int tee(char argv, char *argc[])
     ssize_t num_read;
     char buffer[BUF_SIZE];
 
+    // For copying the file from argc[0] to argc[1]
     if (argv == 2) {
         i_flags = O_RDONLY;
         // Truncate if it already exists
@@ -50,6 +53,7 @@ int tee(char argv, char *argc[])
         }
     }
 
+    // For appending text to the file argc[1]
     else if (argv == 3 && strcmp(argc[0], "-a") == 0) {
         o_flags = O_WRONLY | O_CREAT | O_APPEND;
 
@@ -65,6 +69,7 @@ int tee(char argv, char *argc[])
         exit(EXIT_FAILURE);
     }
 
+    // Writing raw bytes to the file
     while (num_read = read(input_fd, buffer, BUF_SIZE) > 0) {
         if (write(output_fd, buffer, num_read) != num_read) {
             err_exit("write stdout");
