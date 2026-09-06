@@ -52,3 +52,16 @@ gcc directory_of_header_file/ directory_of_header_file/file.c directory/main_fil
         </ul>
   </details>
 </details>
+
+## Contribution
+
+For major changes, please open an issue first to discuss what you’d like to fix improve or add.
+
+## Status
+
+This is an ongoing repository where I'll be adding subject and models as I go and want to deepen my understanding.
+
+## License
+
+Licensed under [MIT License](./LICENSE-MIT). <br/>
+© 2025 Luuk Kessels
