@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "error_helpers.h"
 
 #define BUF_SIZE 4096
 
+void err_exit(const char *);
 void cp(int, char *[]);
 
 int main(void)
@@ -17,13 +19,6 @@ int main(void)
     cp(argc, argv);
 
     return 0;
-}
-
-// Helper function for error
-void err_exit(const char *msg) 
-{
-    perror(msg);
-    exit(EXIT_FAILURE);
 }
 
 // cp(): make a copy of argv[0] and write it to argv[1] and create a hole in out-

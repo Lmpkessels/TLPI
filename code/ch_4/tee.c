@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <error_helpers.h>
 
 #define BUF_SIZE 4096
 
@@ -24,12 +25,6 @@ int main()
     tee(argv, argc2);
 
     return 0;
-}
-
-void err_exit(const char *msg)
-{
-    perror(msg);
-    exit(EXIT_FAILURE);
 }
 
 // tee(), appends text to a file or copies an already existing file to a given
