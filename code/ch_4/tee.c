@@ -22,6 +22,8 @@ int main()
     char *argc2[] = {"-a", "file.txt", "Hello, new world!"};
 
     tee(argv, argc2);
+
+    return 0;
 }
 
 void err_exit(const char *msg)
