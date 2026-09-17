@@ -17,7 +17,6 @@ int main(int argc, char *argv[])
     int access_mode_ofd;
     int access_mode_dfd;
     char *file;
-    off_t off;
     off_t open_off;
     off_t dup_off;
 
