@@ -29,7 +29,7 @@ gcc directory/file.c -o target_directory/file
 
 ```bash
 # Compilation with header file
-gcc directory_of_header_file/ directory_of_header_file/file.c directory/main_file.c
+gcc -Idirectory_of_header_file/ directory_of_header_file/file.c directory/main_file.c
 -o target_directory/file
 ```
 
