@@ -11,7 +11,7 @@ static void f1(void);
 
 static jmp_buf env;
 
-int main(int argc, char *argv)
+int main(void)
 {
     printf("In main\n");
     printf("Calling f1()\n");
